@@ -1,32 +1,41 @@
 import { Selector } from 'testcafe';
+import { ClientFunction } from 'testcafe';
 
-// selectors
+const getWindowLocation = ClientFunction(() => window.location);
+
+
+// checkl all jobs page, title, number of jobs and jobs exists
 const title = Selector('h1');
-const tableRows = Selector('tbody > tr');
-const addJobButton = Selector('a.btn.btn-primary');
-const firstJob = Selector('tbody > tr').withText('Horse Whisperer');
+const tableRows = Selector ('tbody > tr');   
+const addJobButton = Selector ('a.btn.btn-primary');
+const firstJob = Selector ('tbody > tr').withText('Horse Whisperer');
 const submitButton = Selector('button[type="submit"]');
-const clayDryerJob = Selector('tbody > tr').withText('Clay Dryer');
+const cancelButton = Selector('a.btn.btn-success')
+
+   
 
 fixture('Node Jobs')
   .page('http://localhost:3000');
 
 test('All Jobs', async (t) => {
-  // check title, add job button, table rows, and job exists
-  await t
-    .expect(title.innerText).eql('All Jobs')
-    .expect(addJobButton.innerText).eql('Add New Job')
-    .expect(tableRows.count).eql(3)
-    .expect(firstJob.exists).ok();
-});
+    // checkl new job button, title, number of jobs and jobs exists
 
-test('New Job', async (t) => {
-  // click add job button
-  await t
-    .click(addJobButton)
-    .expect(title.innerText).eql('Add Job');
-  // fill out form
-  await t
+    await t
+        .expect(title.innerText).eql('All Jobs')
+        .expect(tableRows.count).eql(3)
+        .expect(addJobButton.innerText).eql('Add New Job')
+        .expect(firstJob.exists).ok();
+
+})
+
+test('New job', async (t) => {
+    // click add job button
+    await t
+        .click(addJobButton)
+        .expect(title.innerText).eql('Add Job')
+    
+    //fill out form
+    await t
     .typeText('input[name="title"]', 'Python Developer')
     .typeText('textarea[name="description"]', 'Write some Python')
     .typeText('input[name="company"]', 'Real Python')
@@ -37,44 +46,54 @@ test('New Job', async (t) => {
     .expect(title.innerText).eql('All Jobs')
     .expect(tableRows.count).eql(4)
     .expect(Selector('tbody > tr').withText('Python Developer').exists).ok();
-});
+})
 
-test('Update Job', async (t) => {
-  // click update button
-  await t
-    .click(firstJob.find('a.btn.btn-warning'))
-    .expect(title.innerText).eql('Update Job');
-  // fill out form
-  await t
-    .typeText('input[name="title"]', 'testing an update', {replace: true})
-    .typeText('textarea[name="description"]', 'test', {replace: true})
-    .typeText('input[name="company"]', 'test', {replace: true})
-    .typeText('input[name="email"]', 't@t.com', {replace: true})
+test('User press cancel', async (t) =>{
+    await t
+        .click(addJobButton)
+        .expect(title.innerText).eql('Add Job')
+
+    // user clicks cancel
+    await t
+        .click(cancelButton)
+        .expect(title.innerText).eql('All Jobs')
+
+
+})
+
+test('User does not enter data in all field', async (t) =>{
+    await t
+        .click(addJobButton)
+        .expect(title.innerText).eql('Add Job')
+
+    // user enter data in only 2 fields
+    await t
+    .typeText('input[name="title"]', 'QA tester')
+    .typeText('textarea[name="description"]', 'I guess that/s me!')
+
+    // user clicks submit button
     .click(submitButton)
-  // check title, table rows, and updated job exists
-  await t
     .expect(title.innerText).eql('All Jobs')
-    .expect(tableRows.count).eql(4) // why 4?
-    .expect(firstJob.exists).notOk()
-    .expect(Selector('tbody > tr').withText('testing an update').exists).ok();
-});
 
-test('Delete Job', async (t) => {
-  // click delete button
-  await t
-    .setNativeDialogHandler(() => true) // => press ok
-    .click(clayDryerJob.find('a.btn.btn-danger'))
-  // check title, table rows, and updated job exists
-  await t
-    .expect(title.innerText).eql('All Jobs')
-    .expect(tableRows.count).eql(3) // why 3?
-    .expect(clayDryerJob.exists).notOk();
-    // click delete button
-  await t
-    .setNativeDialogHandler(() => false) // => press cancel
-    .click(tableRows.find('a.btn.btn-danger'))
-  // check title, table rows, and updated job exists
-  await t
-    .expect(title.innerText).eql('All Jobs')
-    .expect(tableRows.count).eql(3) // why 3?
-});
+})
+
+test('User enters incorrect email', async (t) =>{
+    await t
+        .click(addJobButton)
+        .expect(title.innerText).eql('Add Job')
+
+    // user enter data in only 2 fields
+    await t
+    .typeText('input[name="title"]', 'QA tester')
+    .typeText('textarea[name="description"]', 'I guess that/s me!')
+    .typeText('input[name="email"]', 'michael')
+
+    // user clicks submit button and expect error message to appear
+    .click(submitButton)
+    .expect(title.innerText).eql('Add Job')
+
+
+})
+
+;
+
