@@ -16,6 +16,7 @@ export default class Page {
     this.cookieText = 'We use cookies to give you the best experience on our website. By continuing to browse the site, you agree to our use of cookie. Learn more';
     this.searchNearby = Selector('.geosuggest__text.Nearby__text');
     this.cookieCloseIcon = Selector('.Button__img.CookieConsent__close');
+    this.title = Selector('h1');
 
   }
 }

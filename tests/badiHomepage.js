@@ -25,7 +25,7 @@ test('Check homepage', async (t) => {
 
     // check homepage
     await t
-        .expect(page.h1).eql('Find or rent a room, anywhere.')
+        .expect(page.title.innerText).eql('Find or rent a room, anywhere.')
         .expect(page.listerModeButton.innerText).eql('Rent out a room')
         .expect(page.seekerModeButton.innerText).eql('Find a room')
     
