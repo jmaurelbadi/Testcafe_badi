@@ -1,18 +1,21 @@
 import { Selector } from 'testcafe';
 import { ClientFunction } from 'testcafe';
-import { watchFile } from 'fs';
-import Page from './pages/page-object';
+import { watchFile, lstat } from 'fs';
+import Homepage from './pages/badiHomepage';
 
-const page = new Page();
-
-
-
+const homepage = new Homepage();
 const getPageUrl = ClientFunction(() => window.location.href);
 
 //mock location being accepted in chrome, coordinates of Barcelona
 const mockLocationAPI =  ClientFunction(() => {
     navigator.geolocation.getCurrentPosition = success =>  success({ coords: { latitude: 41, longitude: 2, }, timestamp: Date.now() });
 });
+
+let chars = 'abcdefghijklmnopqrstuvwxyz';
+let fakeemail = chars[Math.floor(Math.random()*26)] + Math.random().toString(36).substring(2,11) + '@mailinator.com';
+// print(chars);
+// register user with simple email
+
 
 
 
@@ -25,9 +28,9 @@ test('Check homepage', async (t) => {
 
     // check homepage
     await t
-        .expect(page.title.innerText).eql('Find or rent a room, anywhere.')
-        .expect(page.listerModeButton.innerText).eql('Rent out a room')
-        .expect(page.seekerModeButton.innerText).eql('Find a room')
+        .expect(homepage.title.innerText).eql('Find or rent a room, anywhere.')
+        .expect(homepage.listerModeButton.innerText).eql('Rent out a room')
+        .expect(homepage.seekerModeButton.innerText).eql('Find a room')
     
     // featured cities should be London, Barcelona, Madrid and Rome
 
@@ -36,34 +39,45 @@ test('Check homepage', async (t) => {
 test('Close cookie banner', async (t) =>{
 
         await t
-            .expect(page.cookieConsentMessage.innerText).eql(page.cookieText)
-            .click(page.cookieCloseIcon)
-            .expect('body').notContains(page.cookieConsentMessage, 'Error: Cookie message is still present')
+            .expect(homepage.cookieConsentMessage.innerText).eql(homepage.cookieText)
+            .click(homepage.cookieCloseIcon)
+            .expect('body').notContains(homepage.cookieConsentMessage, 'Error: Cookie message is still present')
             
 })
 
 ;
 
-fixture('Badi-Search')
-  .page('https://weblocal.badi.com/')
+fixture.only('Register with email')
+    .page('https://weblocal.badi.com/')
+
+    test('Check register option', async (t) => {
+
+        await t 
+            .expect(homepage.logInButton.visible).ok()
+            .click(homepage.logInButton)
+            .expect(homepage.registerWithEmail.innerText).eql('Continue with Email')
+            .expect(homepage.registerWithFacebook.innerText).eql('Continue with Facebook');
 
 
-  //currently fails
+    })
 
-  test('Search for Barcelona', async (t) => {
-    
-    await mockLocationAPI()
+    test('Register with email', async (t) => {
+        await t
+            .click(homepage.registerButton)
+            .click(homepage.registerWithEmail)
+            .typeText(homepage.emailInput, fakeemail)
+            .typeText(homepage.passwordInput, 'Test1234', {speed: 0.1})
+            .wait(500);
 
-    await t
-        .typeText(page.searchButton, 'Barcelona')
-        .click(page.searchNearby)
+            
+        await t
+            .click(homepage.registerInPopUpButton);
 
-    wait(1000)
+        await t 
+            .expect(homepage.GDPRPopUp).contains('Just to let you know...')
 
-     await t
-         .expect(page.searchButton).contains('Barcelona, Spain')
-         .expect(getPageUrl()).contains('Barcelona')
 
-})
+    })
+
 
 ;

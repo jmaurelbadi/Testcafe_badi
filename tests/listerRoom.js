@@ -1,6 +1,6 @@
 import { Selector } from 'testcafe';
 import { ClientFunction } from 'testcafe';
-import Page from './pages/page-object';
+import Page from './pages/badiHomepage';
 
 const page = new Page();
 
@@ -48,12 +48,12 @@ test('Start lister mode', async (t) =>{
         .click('.ListerInfo__Button')
         .expect(getPageUrl()).contains('rent-room')
         .click('.RentRoomButton')
-        //.expect(registerPopUp).contains('.AuthButton AuthButton__email');
         .click('.AuthButton__email')
         .typeText(usernameEmail, fakeemail)
         .typeText(passwordEmail, 'Test1234');
 
     await t
+    // currently fails, register button does not become green
         .click(signUp)
         .click('.Button__green');
 })
